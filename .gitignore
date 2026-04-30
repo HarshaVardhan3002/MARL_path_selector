@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Environments
+.venv/
+.env
+.python-version
+
+# Tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# External code clones (kept locally, not committed; vendored snapshots live in scion_sim/_vendored/)
+external/
+
+# Generated artifacts
+data/raw/
+data/cache/
+*.parquet
+calibration/figures/
+docs/figures/*.png
+docs/figures/*.pdf
+
+# Allow committed example/reference figures explicitly
+!docs/figures/.gitkeep

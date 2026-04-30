@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "shard_index": 15,
+  "shard_size_episodes": 50,
+  "episode_ids": [
+    "ep-000750",
+    "ep-000751",
+    "ep-000752",
+    "ep-000753",
+    "ep-000754",
+    "ep-000755",
+    "ep-000756",
+    "ep-000757",
+    "ep-000758",
+    "ep-000759",
+    "ep-000760",
+    "ep-000761",
+    "ep-000762",
+    "ep-000763",
+    "ep-000764",
+    "ep-000765",
+    "ep-000766",
+    "ep-000767",
+    "ep-000768",
+    "ep-000769",
+    "ep-000770",
+    "ep-000771",
+    "ep-000772",
+    "ep-000773",
+    "ep-000774",
+    "ep-000775",
+    "ep-000776",
+    "ep-000777",
+    "ep-000778",
+    "ep-000779",
+    "ep-000780",
+    "ep-000781",
+    "ep-000782",
+    "ep-000783",
+    "ep-000784",
+    "ep-000785",
+    "ep-000786",
+    "ep-000787",
+    "ep-000788",
+    "ep-000789",
+    "ep-000790",
+    "ep-000791",
+    "ep-000792",
+    "ep-000793",
+    "ep-000794",
+    "ep-000795",
+    "ep-000796",
+    "ep-000797",
+    "ep-000798",
+    "ep-000799"
+  ],
+  "git_sha": "uninitialized",
+  "git_dirty": true,
+  "config_hash": "sha256:14b3827b380f3428c6f0e9ed491f7f06477717eb89ebd44f61dda632e4a200d2",
+  "config_inline": {
+    "seed": 2026,
+    "topology": {
+      "num_agents": 24,
+      "paths_per_agent": 12,
+      "num_links": 64,
+      "avg_hops_per_path": 8.7,
+      "link_capacity_mbps_mean": 100.0,
+      "link_capacity_mbps_std": 20.0,
+      "base_rtt_ms_mean": 400.0,
+      "base_rtt_ms_std": 80.0
+    },
+    "fluid": {
+      "dt_sec": 0.1,
+      "a_bar": 0.05,
+      "b_r": 0.875,
+      "beta_j": 10.0,
+      "init_flow_rate": 1.0
+    },
+    "lifetime": {
+      "distribution": "lognormal",
+      "median_seconds": 27000.0,
+      "sigma": 1.6,
+      "weibull_shape": 0.7
+    },
+    "churn": {
+      "appear_rate_per_agent_per_hour": 0.5,
+      "initial_visible_fraction": 0.5
+    },
+    "discrepancy": {
+      "asymmetry_rate": 0.3
+    },
+    "observation_noise": {
+      "rtt_relative_std": 0.2,
+      "bandwidth_relative_std": 0.05,
+      "loss_base_pct": 0.5,
+      "loss_relative_std": 2.0,
+      "jitter_relative_std": 0.4
+    },
+    "trajectory": {
+      "observation_dt_sec": 1.0,
+      "episode_seconds": 3600.0,
+      "num_episodes": 1000,
+      "shard_size_episodes": 50,
+      "output_dir": "data/phase0_trajectories"
+    }
+  },
+  "dataset_hash": "sha256:fc77c8a35be194fb9539b4aaa197ae20c2727bb6fcfafe363cd7c5e129c82a33",
+  "sim_version": "scion_sim 0.0.1",
+  "pami_pinned_sha": "294c07979c1d58128ac3ec80e18288388d5bf60f",
+  "scionpathml_pinned_sha": "362ad60885dabeb2a067d3dae058c506ce5f092a",
+  "created_utc": "2026-04-30T00:40:49Z"
+}
