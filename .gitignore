@@ -24,21 +24,34 @@ htmlcov/
 # IDE
 .idea/
 .vscode/
+.code-review-graph/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# External code clones (kept locally, not committed; vendored snapshots live in scion_sim/_vendored/)
+# External code clones (vendored snapshots live in scion_sim/_vendored/)
 external/
 
-# Generated artifacts
+# Generated data artifacts
 data/raw/
 data/cache/
+data/phase0_trajectories/
+data/baselines/
+data/baselines_stress/
+data/baselines_stress_50a35m/
 *.parquet
+
+# Generated figures
 calibration/figures/
 docs/figures/*.png
 docs/figures/*.pdf
 
-# Allow committed example/reference figures explicitly
+# Allow committed reference figures
 !docs/figures/.gitkeep
+
+# Training runs (checkpoints, TensorBoard logs, sweep outputs)
+runs/
+
+# Canonical run logs
+data/canonical_run.log

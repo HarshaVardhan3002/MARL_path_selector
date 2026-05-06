@@ -73,6 +73,10 @@ class Phase0Simulator:
         self.selected: dict[str, str | None] = {a: None for a in self.agent_ids}
         # Active flow rate per (agent, fingerprint). Deleted when path expires.
         self.flow_rates: dict[tuple[str, str], float] = {}
+        # Pending selections injected by an external policy (Phase 1+ env).
+        # Consumed at most once by `_ensure_selection`; an unconsumed entry
+        # naturally expires when the next observation tick begins.
+        self._pending_selections: dict[str, str] = {}
         # Current link utilization (filled after first step).
         self.link_util: np.ndarray = np.zeros(cfg.topology.num_links)
 
@@ -89,12 +93,39 @@ class Phase0Simulator:
             self.selected[agent_id] = choice.fingerprint
             self.flow_rates[(agent_id, choice.fingerprint)] = self.cfg.fluid.init_flow_rate
 
+    def set_pending_selections(self, picks: dict[str, str]) -> None:
+        """Inject per-agent path-switch intents to apply at the next ODE step.
+
+        Phase 1+ env hook: the env's `step(actions)` translates each agent's
+        Discrete(4) slot to a path fingerprint and registers it here. Pending
+        picks are honoured at most once and consumed by `_ensure_selection`;
+        an entry whose path is no longer visible at consumption time is
+        discarded silently and the existing fall-back logic re-picks.
+        """
+        self._pending_selections.update({k: v for k, v in picks.items() if v is not None})
+
     def _ensure_selection(self) -> None:
-        """Re-pick if an agent's selection expired or it has no selection."""
+        """Re-pick if an agent's selection expired or it has no selection.
+
+        Pending external picks (set via `set_pending_selections`) take
+        precedence: if the chosen fingerprint is currently visible to the
+        agent, the switch is committed and the prior flow's rate is dropped.
+        """
         for agent_id in self.agent_ids:
             current_fp = self.selected[agent_id]
             visible = list(self.control.visible_paths(agent_id))
             visible_fps = {p.fingerprint for p in visible}
+            pending = self._pending_selections.pop(agent_id, None)
+
+            if pending is not None and pending in visible_fps and pending != current_fp:
+                if current_fp is not None:
+                    self.flow_rates.pop((agent_id, current_fp), None)
+                self.selected[agent_id] = pending
+                self.flow_rates.setdefault(
+                    (agent_id, pending), self.cfg.fluid.init_flow_rate,
+                )
+                continue
+
             if current_fp is None or current_fp not in visible_fps:
                 # drop the stale flow if any
                 if current_fp is not None:

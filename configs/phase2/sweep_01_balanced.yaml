@@ -1,0 +1,86 @@
+name: sweep_01_balanced
+phase1:
+  sim:
+    seed: 2026
+    topology:
+      num_agents: 50
+      paths_per_agent: 12
+      num_links: 64
+      avg_hops_per_path: 8.7
+      link_capacity_mbps_mean: 35.0
+      link_capacity_mbps_std: 20.0
+      base_rtt_ms_mean: 400.0
+      base_rtt_ms_std: 80.0
+    fluid:
+      dt_sec: 0.1
+      a_bar: 0.05
+      b_r: 0.875
+      beta_j: 10.0
+      init_flow_rate: 1.0
+    lifetime:
+      distribution: lognormal
+      median_seconds: 27000.0
+      sigma: 1.6
+      weibull_shape: 0.7
+    churn:
+      appear_rate_per_agent_per_hour: 0.5
+      initial_visible_fraction: 0.5
+    discrepancy:
+      asymmetry_rate: 0.3
+    observation_noise:
+      rtt_relative_std: 0.2
+      bandwidth_relative_std: 0.05
+      loss_base_pct: 0.5
+      loss_relative_std: 2.0
+      jitter_relative_std: 0.4
+    trajectory:
+      observation_dt_sec: 1.0
+      episode_seconds: 3600.0
+      num_episodes: 1
+      shard_size_episodes: 1
+      output_dir: runs/phase2/sweep_01_balanced/seed_42
+  observation:
+    top_k: 4
+    norm_window_steps: 16
+    trend_window_steps: 5
+    loss_history_steps: 10
+    churn_history_steps: 10
+    max_age_seconds: 86400.0
+    loss_observation_scale_pct: 100.0
+    loss_event_threshold_pct: 1.0
+    s2_sentinel: -0.25
+    s3_saturation_steps: 100
+    trend_slope_scale: 10.0
+    paths_per_agent_norm: 12
+  reward:
+    w_throughput: 1.0
+    w_congestion: 2.0
+    w_diversity: 0.5
+    congestion_util_threshold: 0.7
+  baseline:
+    oracle_ema_window: 20
+    oracle_loss_penalty: 1.0
+mappo:
+  episodes_per_run: 1500
+  episode_length: 3600
+  rollout_episodes: 4
+  ppo_epochs: 4
+  minibatch_size: 256
+  learning_rate: 0.0003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  entropy_coef: 0.01
+  value_loss_coef: 0.5
+  max_grad_norm: 0.5
+  hidden_sizes:
+  - 256
+  - 256
+  activation: tanh
+  eval_episodes: 100
+  auto_restart_entropy_coef: 0.05
+  auto_restart_threshold_episode: 200
+  auto_restart_entropy_floor: 0.05
+  log_interval_episodes: 10
+  checkpoint_every_episodes: 200
+output_dir: runs/phase2
