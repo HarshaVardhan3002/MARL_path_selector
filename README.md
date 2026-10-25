@@ -1,10 +1,34 @@
+<div align="center">
+
 # SCION MARL Path Selection
 
-A full-stack multi-agent reinforcement learning system that trains decentralized SCION path-selection policies. Agents learn to coordinate traffic distribution across network paths without any runtime communication, replacing centralized path oracles with a frozen, per-host model artifact that ships identically to every node.
+**Many hosts, one shared network, no talking at runtime.**<br>
+Multi-agent reinforcement learning that trains one small, frozen path-selection policy for every SCION end host, so the population spreads its traffic instead of stampeding onto the same links.
 
-A proof of concept for my Master's research on SCION path selection. Written in Python 3.11. ~5,500 lines of production code, 27-run hyperparameter sweep, Pareto-optimal policy selection, and a distillation-ready export pipeline.
+![Python](https://img.shields.io/badge/python-3.11-3776ab)
+![RL](https://img.shields.io/badge/MAPPO-CTDE-2b3137)
+![Env](https://img.shields.io/badge/PettingZoo-Parallel%20API-2b3137)
+![PyTorch](https://img.shields.io/badge/PyTorch-CUDA%20%7C%20ROCm%20%7C%20CPU-ee4c2c)
+[![Companion](https://img.shields.io/badge/companion-SCIONfit-3776ab)](https://github.com/HarshaVardhan3002/SCIONfit)
 
-Companion project: [SCIONfit / scionarena](https://github.com/HarshaVardhan3002/SCIONfit) tests whether a path-selection model like this one survives being deployed alongside copies of itself.
+[Why](#why-this-exists) · [How it works](#how-it-works) · [Architecture](#architecture) · [Design decisions](#key-design-decisions) · [Setup](#setup) · [Status](#status)
+
+</div>
+
+A proof of concept for my Master's research on SCION path selection. Written in Python 3.11: about 5,500 lines of production code, a 27-run hyperparameter sweep, Pareto-optimal policy selection, and a distillation-ready export pipeline.
+
+<table>
+<tr>
+<td align="center" width="20%"><h3>31</h3><sub>numbers each host observes, all local and noisy</sub></td>
+<td align="center" width="20%"><h3>4</h3><sub>top-K path slots to choose from</sub></td>
+<td align="center" width="20%"><h3>50 × 64</h3><sub>agents × shared links in the stress regime</sub></td>
+<td align="center" width="20%"><h3>1,744</h3><sub>inputs to the training-only critic</sub></td>
+<td align="center" width="20%"><h3>27</h3><sub>training runs: 9 reward mixes × 3 seeds</sub></td>
+</tr>
+</table>
+
+> [!TIP]
+> **Companion project:** [SCIONfit / scionarena](https://github.com/HarshaVardhan3002/SCIONfit) tests whether a path-selection model like this one survives being deployed alongside copies of itself.
 
 ## Why This Exists
 
@@ -14,7 +38,35 @@ Previous work (Kruger et al. 2023) solved this with a centralized Path Oracle th
 
 This project takes a different approach. Instead of coordinating at runtime, we train agents offline with a centralized critic that sees the full network state, then throw the critic away and deploy only the per-agent actor. Each host runs the same small MLP, sees only its own local observations, and yet the population converges to a traffic distribution that avoids congestion without anyone talking to anyone else. The technical term is Centralized Training with Decentralized Execution (CTDE), implemented here via Multi-Agent Proximal Policy Optimization (MAPPO).
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/HarshaVardhan3002/SCIONfit/main/docs/media/m4-path-share.png" width="820" alt="The oscillation problem: a greedy model's population flips between two paths in a square wave, a stochastic model's population stays steady">
+  <br><sub>The oscillation this project is built to avoid, measured in <a href="https://github.com/HarshaVardhan3002/SCIONfit">SCIONfit</a>: a greedy "lowest RTT" model (red) throws its hosts back and forth; a model that spreads its advice (blue) holds steady.</sub>
+</p>
+
+## How it works
+
+```mermaid
+flowchart LR
+    subgraph TRAIN["Training, offline"]
+        SIM["Fluid-model simulator<br>PAMI ODE, calibrated to ScionPathML"] --> ENV["PettingZoo environment<br>noisy local observations"]
+        ENV --> A1["Shared actor<br>MLP 256 × 256"]
+        ENV --> C["Centralized critic<br>sees the whole network"]
+        C -- "advantages (GAE)" --> A1
+    end
+    subgraph DEPLOY["Deployment, every host"]
+        A2["Same frozen actor<br>local observations only"] --> PICK["Pick one of 4 paths"]
+    end
+    A1 -- "export; the critic is thrown away" --> A2
+```
+
+The critic sees everything during training and is then discarded. Each host keeps only the actor: the same small network, its own local view, and no messages to anyone.
+
 ## Architecture
+
+Two Python packages, `scion_sim/` (the simulator and environment) and `scion_marl/` (the training stack), plus orchestration scripts, calibration and tests.
+
+<details>
+<summary><b>Open the module-by-module tour</b></summary>
 
 The codebase is split into two top-level Python packages and a supporting infrastructure layer.
 
@@ -93,6 +145,8 @@ Four test modules covering the core pipeline:
 - `test_observation_builder.py`: 31-dim vector construction, normalization windows, top-K ordering
 - `test_reward.py`: All three reward terms, edge cases (no selection, single agent, full congestion)
 - `test_env_smoke.py`: Full PettingZoo API compliance, reset/step cycle, action masking
+
+</details>
 
 ## Key Design Decisions
 
