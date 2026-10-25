@@ -2,7 +2,9 @@
 
 A full-stack multi-agent reinforcement learning system that trains decentralized SCION path-selection policies. Agents learn to coordinate traffic distribution across network paths without any runtime communication, replacing centralized path oracles with a frozen, per-host model artifact that ships identically to every node.
 
-Built as a Master's thesis PoC. Written in Python 3.11. ~5,500 lines of production code, 27-run hyperparameter sweep, Pareto-optimal policy selection, and a distillation-ready export pipeline.
+A proof of concept for my Master's research on SCION path selection. Written in Python 3.11. ~5,500 lines of production code, 27-run hyperparameter sweep, Pareto-optimal policy selection, and a distillation-ready export pipeline.
+
+Companion project: [SCIONfit / scionarena](https://github.com/HarshaVardhan3002/SCIONfit) tests whether a path-selection model like this one survives being deployed alongside copies of itself.
 
 ## Why This Exists
 
@@ -131,6 +133,10 @@ uv run python scripts/run_phase2_select_and_report.py
 ```bash
 uv run python scripts/run_smoke.py
 ```
+
+## Status
+
+The simulator, environment, MAPPO trainer, sweep, evaluation and Pareto-selection pipeline are built and tested (`tests/`). Trained checkpoints and sweep reports are generated locally and are not committed, so this repository shows the system, not a results table.
 
 ## Tech Stack
 
